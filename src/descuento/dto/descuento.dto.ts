@@ -1,4 +1,4 @@
-export class CreateDescuentoDto {
+export class DescuentoDto {
 
   id: number;
   descuento: number;

@@ -1,25 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DescuentoService } from './descuento.service';
 import { CreateDescuentoDto } from './dto/create-descuento.dto';
 import { UpdateDescuentoDto } from './dto/update-descuento.dto';
+import { DescuentoDto } from './dto/descuento.dto';
 
 @Controller('descuento')
 export class DescuentoController {
   constructor(private readonly descuentoService: DescuentoService) {}
 
   @Post()
-  create(@Body() createDescuentoDto: CreateDescuentoDto) {
-    return this.descuentoService.create(createDescuentoDto);
+  async create(@Body() createDescuentoDto: CreateDescuentoDto): Promise<DescuentoDto> {
+    try {
+      const resultado = await this.descuentoService.create(createDescuentoDto);
+      return resultado;
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
   @Get()
-  findAll() {
-    return this.descuentoService.findAll();
+  async findAll(): Promise<DescuentoDto[]> {
+    const resultado: DescuentoDto[] = await this.descuentoService.findAll();
+    return resultado;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.descuentoService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<DescuentoDto> {
+    const resultado: DescuentoDto = await this.descuentoService.findOne(+id);
+    if (resultado) {
+      return resultado;
+    }
+    throw new NotFoundException(`id = ${id} no encontrado`)
   }
 
   @Patch(':id')
@@ -28,7 +39,12 @@ export class DescuentoController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.descuentoService.remove(+id);
+  async remove(@Param('id') id: string): Promise<DescuentoDto> {
+    try {
+      const resultado = await this.descuentoService.remove(+id);
+    return resultado;
+    } catch (e) {
+      throw new NotFoundException(e.message);
+    }
   }
 }
