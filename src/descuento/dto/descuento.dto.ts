@@ -1,6 +1,6 @@
 export class DescuentoDto {
 
   id: number;
-  descuento: number;
+  porcentaje: number;
 
 }

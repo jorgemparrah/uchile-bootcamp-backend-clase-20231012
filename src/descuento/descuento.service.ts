@@ -4,6 +4,7 @@ import { UpdateDescuentoDto } from './dto/update-descuento.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { DescuentoDto } from './dto/descuento.dto';
+import { DescuentoMapper } from './mapper/descuento.mapper';
 
 @Injectable()
 export class DescuentoService {
@@ -14,11 +15,14 @@ export class DescuentoService {
   ) {}
 
   async create(createDescuentoDto: CreateDescuentoDto): Promise<DescuentoDto> {
+    // BUSCAMOS SI EXISTE EL ID
     const descuentoEncontrado = await this.findOne(createDescuentoDto.id);
     if (descuentoEncontrado) {
+      // SI EXISTE ENVIAMOS UN ERROR
       throw Error(`El id = ${createDescuentoDto.id} ya existe`);
     }
-    let sql: string = `INSERT INTO DESCUENTOS(id, porcentaje) VALUES(${createDescuentoDto.id}, ${createDescuentoDto.descuento})`;
+    // SI NO EXISTE LO CREAMOS
+    let sql: string = `INSERT INTO DESCUENTOS(id, porcentaje) VALUES(${createDescuentoDto.id}, ${createDescuentoDto.porcentaje})`;
     const resultado = await this.dataSource.query(sql);
     return resultado;
   }
@@ -35,18 +39,32 @@ export class DescuentoService {
     if (resultado.length === 0) {
       return null;
     }
-    return resultado[0];
+    return DescuentoMapper.toDto(resultado[0]);
   }
 
-  update(id: number, updateDescuentoDto: UpdateDescuentoDto) {
-    return `This action updates a #${id} descuento`;
+  async update(id: number, updateDescuentoDto: UpdateDescuentoDto): Promise<DescuentoDto> {
+    // BUSCAMOS SI EXISTE EL ID
+    const descuentoEncontrado = await this.findOne(id);
+    if (!descuentoEncontrado) {
+      // SI NO EXISTE ENVIAMOS ERROR
+      throw Error(`El id = ${id} no existe`);
+    }
+    // SI EXISTE ACTUALIZAMOS
+    let sql: string = `UPDATE DESCUENTOS SET porcentaje = ${updateDescuentoDto.porcentaje} WHERE id = ${id};`;
+    console.log(sql);
+    const resultado = await this.dataSource.query(sql);
+    const actualizado = await this.findOne(id);
+    return actualizado;
   }
 
   async remove(id: number): Promise<DescuentoDto> {
+    // BUSCAMOS SI EXISTE EL ID
     const descuentoEncontrado = await this.findOne(id);
     if (!descuentoEncontrado) {
+      // SI NO EXISTE ENVIAMOS ERROR
       throw Error(`El id = ${id} no existe`);
     }
+    // SI EXISTE ELIMINAMOS
     let sql: string = `DELETE FROM DESCUENTOS WHERE id = ${id};`;
     const resultado = await this.dataSource.query(sql);
     return descuentoEncontrado;

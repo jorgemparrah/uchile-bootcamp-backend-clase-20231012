@@ -34,8 +34,13 @@ export class DescuentoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDescuentoDto: UpdateDescuentoDto) {
-    return this.descuentoService.update(+id, updateDescuentoDto);
+  async update(@Param('id') id: string, @Body() updateDescuentoDto: UpdateDescuentoDto): Promise<DescuentoDto>  {
+    try {
+      const resultado = await this.descuentoService.update(+id, updateDescuentoDto);
+      return resultado;
+    } catch (e) {
+      throw new NotFoundException(e.message);
+    }
   }
 
   @Delete(':id')

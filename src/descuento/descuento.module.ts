@@ -5,5 +5,6 @@ import { DescuentoController } from './descuento.controller';
 @Module({
   controllers: [DescuentoController],
   providers: [DescuentoService],
+  exports: [DescuentoService]
 })
 export class DescuentoModule {}

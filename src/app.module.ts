@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DescuentoModule } from './descuento/descuento.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CategoriaModule } from './categoria/categoria.module';
 
 @Module({
   imports: [
@@ -12,7 +13,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       password: "clave123",
       database: 'EJEMPLO_PEDIDOS'
     }),
-    DescuentoModule
+    DescuentoModule,
+    CategoriaModule
   ],
   controllers: [],
   providers: [],
