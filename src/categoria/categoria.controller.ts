@@ -24,6 +24,18 @@ export class CategoriaController {
     return resultado;
   }
 
+  @Get("descuento-mayor-50")
+  async findByDescuentoMayorDe50(): Promise<CategoriaDto[]> {
+    const resultado: CategoriaDto[] = await this.categoriaService.findCategoriasConMas50Descuento();
+    return resultado;
+  }
+
+  @Get('page/:cantidad/:numeroPagina')
+  async findPage(@Param('cantidad') cantidad: number, @Param('numeroPagina') numeroPagina: number): Promise<CategoriaDto[]> {
+    const resultado: CategoriaDto[] = await this.categoriaService.findPage(cantidad, numeroPagina);
+    return resultado;
+  }
+
   @Get(':nombre')
   async findOne(@Param('nombre') nombre: string): Promise<CategoriaDto>  {
     const resultado: CategoriaDto = await this.categoriaService.findOne(nombre);
@@ -31,6 +43,12 @@ export class CategoriaController {
       return resultado;
     }
     throw new NotFoundException(`nombre = ${nombre} no encontrado`)
+  }
+
+  @Get('descuento/:idDescuento')
+  async findByDescuento(@Param('idDescuento') idDescuento: number): Promise<CategoriaDto[]>  {
+    const resultado: CategoriaDto[] = await this.categoriaService.findCategoriasByDescuento(idDescuento);
+    return resultado;
   }
 
   @Patch(':nombre')

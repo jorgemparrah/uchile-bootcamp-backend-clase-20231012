@@ -24,13 +24,21 @@ export class DescuentoController {
     return resultado;
   }
 
+  @Get('count')
+  async count(): Promise<number> {
+    const resultado: number = await this.descuentoService.count();
+    return resultado;
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<DescuentoDto> {
-    const resultado: DescuentoDto = await this.descuentoService.findOne(+id);
-    if (resultado) {
+    try {
+      const resultado: DescuentoDto = await this.descuentoService.findOne(+id);
       return resultado;
+    } catch (e) {
+      throw new NotFoundException(`id = ${id} no encontrado`);
     }
-    throw new NotFoundException(`id = ${id} no encontrado`)
+    // throw new NotFoundException(`id = ${id} no encontrado`)
   }
 
   @Patch(':id')

@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, In, IsNull, Like, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { CategoriaDto } from './dto/categoria.dto';
 import { DescuentoDto } from 'src/descuento/dto/descuento.dto';
 import { DescuentoService } from 'src/descuento/descuento.service';
 import { CategoriaMapper } from './mapper/categoria.mapper';
+import { Categoria } from 'src/categoria/entity/categoria.entity';
 
 @Injectable()
 export class CategoriaService {
@@ -14,7 +15,9 @@ export class CategoriaService {
   constructor(
     @InjectDataSource()
     private dataSource: DataSource,
-    private descuentoService: DescuentoService
+    private descuentoService: DescuentoService,
+    @InjectRepository(Categoria)
+    private categoriaRepository: Repository<Categoria>
   ) {}
 
   async create(createCategoriaDto: CreateCategoriaDto): Promise<CategoriaDto> {
@@ -38,10 +41,37 @@ export class CategoriaService {
   }
 
   async findAll(): Promise<CategoriaDto[]> {
-    let sql: string = "SELECT * FROM CATEGORIAS c INNER JOIN DESCUENTOS d ON c.idDescuento = d.id;";
-    const resultado = await this.dataSource.query(sql);
+    const resultado = await this.categoriaRepository.find({
+      select: {
+        nombre: true
+      },
+      relations: {
+        descuento: true
+      }
+    });
+    console.log(resultado);
+    // let sql: string = "SELECT * FROM CATEGORIAS c INNER JOIN DESCUENTOS d ON c.idDescuento = d.id;";
+    // const resultado = await this.dataSource.query(sql);
     return CategoriaMapper.toDtoList(resultado);
   }
+
+  async findPage(cantidad: number, numeroPagina: number): Promise<CategoriaDto[]> {
+    const resultado = await this.categoriaRepository.find({
+      select: {
+        nombre: true
+      },
+      relations: {
+        descuento: true
+      },
+      order: {
+        nombre: "ASC",
+      },
+      skip: (numeroPagina - 1) * cantidad,
+      take: cantidad
+    });
+    return CategoriaMapper.toDtoList(resultado);
+  }
+
 
   async findOne(nombre: string): Promise<CategoriaDto> {
     let sql: string = `SELECT * FROM CATEGORIAS c INNER JOIN DESCUENTOS d ON c.idDescuento = d.id WHERE nombre = '${nombre}';`;
@@ -50,6 +80,30 @@ export class CategoriaService {
       return null;
     }
     return CategoriaMapper.toDto(resultado[0]);
+  }
+
+  async findCategoriasByDescuento(idDescuento: number): Promise<CategoriaDto[]> {
+    const resultado = await this.categoriaRepository.findBy({
+      idDescuento: idDescuento
+    });
+    return CategoriaMapper.toDtoList(resultado);
+  }
+
+  async findCategoriasConMas50Descuento(): Promise<CategoriaDto[]> {
+    const resultado = await this.categoriaRepository.find({
+      where:[{
+        descuento: {
+          porcentaje: In([ 50, 60,  10 ])
+        },
+        nombre: Like("%Categoria%")
+      },{
+        idDescuento: IsNull()
+      }],
+      relations: {
+        descuento: true
+      }
+    });
+    return CategoriaMapper.toDtoList(resultado);
   }
 
   async update(nombre: string, updateCategoriaDto: UpdateCategoriaDto): Promise<CategoriaDto>  {

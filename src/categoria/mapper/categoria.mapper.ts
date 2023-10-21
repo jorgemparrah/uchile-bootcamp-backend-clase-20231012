@@ -1,17 +1,18 @@
 import { DescuentoMapper } from "src/descuento/mapper/descuento.mapper";
 import { CategoriaDto } from "../dto/categoria.dto";
+import { Categoria } from "../entity/categoria.entity";
 
 export class CategoriaMapper {
 
-  static toDto(registro: any): CategoriaDto {
+  static toDto(entidad: Categoria): CategoriaDto {
     const dto =  new CategoriaDto();
-    dto.nombre = registro.nombre;
-    dto.descuento = DescuentoMapper.toDto(registro);
+    dto.nombre = entidad.nombre;
+    dto.descuento = DescuentoMapper.toDto(entidad.descuento);
     return dto;
   }
 
-  static toDtoList(registros: any[]): CategoriaDto[] {
-    return registros.map(registro => this.toDto(registro));
+  static toDtoList(entidades: Categoria[]): CategoriaDto[] {
+    return entidades.map(entidad => this.toDto(entidad));
   }
 
 }
